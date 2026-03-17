@@ -40,3 +40,10 @@ out/
 application.yml
 application-*.yml
 *.json
+
+# Mac
+.DS_Store
+**/.DS_Store
+
+# Google OAuth tokens
+tokens/
