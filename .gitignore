@@ -35,3 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Security - API Keys
+application.yml
+application-*.yml
+*.json
