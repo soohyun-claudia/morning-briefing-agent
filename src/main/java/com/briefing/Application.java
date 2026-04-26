@@ -1,10 +1,14 @@
 package com.briefing;
 
 import com.briefing.agent.CalendarAgent;
+import com.briefing.agent.dto.CalendarEvent;
+import com.briefing.service.BriefingGeneratorService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
+import java.util.List;
 
 @SpringBootApplication
 public class Application {
@@ -14,13 +18,15 @@ public class Application {
 	}
 
 	@Bean
-	public CommandLineRunner run(CalendarAgent calendarAgent) {
-		return args ->{
+	public CommandLineRunner run(CalendarAgent calendarAgent, BriefingGeneratorService briefingGeneratorService) {
+		return args -> {
+			List<CalendarEvent> events = calendarAgent.getTodayEvents();
 			System.out.println("=== 오늘 일정 ===");
-			calendarAgent.getTodayEvents()
-					.forEach(event -> System.out.println(
-							event.startTime() + " " + event.title()
-					));
+			events.forEach(event -> System.out.println(event.startTime() + " " + event.title()));
+
+			System.out.println("\n=== 브리핑 ===");
+			String briefing = briefingGeneratorService.generateBriefing(events);
+			System.out.println(briefing);
 		};
 	}
 
