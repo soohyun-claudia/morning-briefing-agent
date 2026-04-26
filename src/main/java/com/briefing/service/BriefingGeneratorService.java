@@ -51,9 +51,9 @@ public class BriefingGeneratorService {
      *   <li>응답 JSON에서 브리핑 텍스트 추출하여 반환</li>
      * </ol>
      *
-     * @param events events 오늘의 캘린더 일정 목록 ({@link CalendarEvent} 리스트)
-     * @return Claude가 생성한 브리핑 텍스트
-     * @throws Exception Exception API 호출 실패 또는 응답 파싱 실패 시
+     * @param events 오늘의 캘린더 일정 목록 ({@link CalendarEvent} 리스트)
+     * @return Claude가 생성한 마크다운 형식의 브리핑 텍스트
+     * @throws Exception API 호출 실패 또는 응답 파싱 실패 시
      */
     public String generateBriefing(List<CalendarEvent> events) throws Exception{
         // 1. 프롬프트 만들기 : 일정 목록을 Claude가 이해할 수 있는 텍스트 형식으로 변환

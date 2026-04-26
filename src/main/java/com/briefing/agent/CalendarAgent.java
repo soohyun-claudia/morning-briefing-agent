@@ -28,16 +28,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 각 단계 핵심 훑기
- * GoogleClientSecrets.load : credentials.json 파일 읽기
- * GoogleAuthorizationCodeFlow : OAuth 인증 흐름 설정
- * CALENDAR_READONLY : 캘린더 읽기 권한만 요청
- * FileDAtaStoreFactory : 토큰을 tokens 폴더에 저장
- * LocalSErverReceiver : 브라우저 로그인 후 토큰 받는 로컬 서버
- * Calendar.Builder : 실제 API 호출할 수 있는 객체 생성
- */
-
-/**
  * Google Calendar API를 호출하여 오늘의 일정을 수집하는 Agent
  *
  * <p>Google OAuth 2.0 인증을 통해 사용자의 캘린더에 접근하고,
@@ -104,8 +94,8 @@ public class CalendarAgent {
                 .execute()
                 .getItems();
 
-        // 일정 제목만 추출해서 반환
-        return events.stream() // 이벤트 하나씩 꺼내서 처리
+        // Event → CalendarEvent DTO로 변환하여 반환
+        return events.stream()
                 .map(event -> new CalendarEvent(
                     event.getSummary(),
                     extractStartTime(event)
@@ -139,6 +129,16 @@ public class CalendarAgent {
                 .atStartOfDay(ZoneId.systemDefault());
     }
 
+    /**
+     * Google Calendar API 서비스 객체를 생성하여 반환한다.
+     *
+     * <p>처음 실행 시 브라우저를 통해 Google OAuth 로그인을 진행하고,
+     * 발급된 토큰을 tokens 폴더에 저장한다.
+     * 이후 실행 시에는 저장된 토큰을 재사용하여 자동으로 인증한다.
+     *
+     * @return 인증이 완료된 {@link Calendar} 서비스 객체
+     * @throws Exception 인증 파일 로드 실패 또는 OAuth 인증 실패 시
+     */
     private Calendar getCalendarService() throws Exception {
 
         // 1. credentials.json을 읽어야 함
