@@ -19,9 +19,9 @@ Agent 설계 패턴과 AI 개발 워크플로우를 직접 연구합니다.
 | 백엔드 | Spring Boot 3.5.1 / Java 21 |
 | AI | Claude API (Anthropic) |
 | 캘린더 | Google Calendar API |
+| 이메일 | Gmail SMTP (JavaMailSender) |
+| 스케줄링 | Spring `@Scheduled` (cron) |
 | 뉴스 | NewsAPI (예정) |
-| 이메일 | Gmail SMTP (JavaMailSender, 예정) |
-| 스케줄링 | Spring `@Scheduled` (cron, 예정) |
 | 배포 | AWS EC2 (예정) |
 | CI/CD | GitHub Actions (예정) |
 
@@ -33,15 +33,16 @@ Agent 설계 패턴과 AI 개발 워크플로우를 직접 연구합니다.
 src/main/java/com/briefing
 ├── agent
 │   ├── dto
-│   │   └── CalendarEvent        # 캘린더 일정 DTO
-│   ├── BriefingAgent            # 전체 흐름 조율 (Orchestrator, 예정)
+│   │   └── CalendarEvent        # 캘린더 일정 DTO ✅
+│   ├── BriefingAgent            # 전체 흐름 조율 (Orchestrator) ✅
 │   ├── CalendarAgent            # 캘린더 수집 ✅
 │   ├── NewsAgent                # 뉴스 수집 (예정)
 │   └── DeliveryAgent            # 브리핑 전달 (예정)
 ├── service
 │   ├── BriefingGeneratorService # Claude API 호출 ✅
-│   └── MailService              # 이메일 발송 (예정)
-├── scheduler                    # cron 실행 (예정)
+│   └── MailService              # 이메일 발송 ✅
+├── scheduler
+│   └── BriefingScheduler        # 매일 05:30 cron 자동 실행 ✅
 └── config
 ```
 
@@ -52,9 +53,11 @@ src/main/java/com/briefing
 ### 1단계 — Single Agent 구축
 - [x] Google Calendar API 연동
 - [x] Claude API 연동 + 브리핑 생성
-- [ ] NewsAPI 연동 + 뉴스 요약
-- [ ] 이메일 자동 발송
-- [ ] 매일 아침 cron 자동 실행
+- [x] 이메일 자동 발송 (Gmail SMTP)
+- [x] 매일 아침 cron 자동 실행 (05:30)
+- [x] BriefingAgent Orchestrator 구현
+- [ ] AWS EC2 배포
+- [ ] NewsAPI 연동 + 뉴스 요약 (예정)
 
 ### 2단계 — Multi-Agent 확장
 - [ ] Agent 역할별 분리
@@ -75,6 +78,7 @@ src/main/java/com/briefing
 - Google Cloud Console 프로젝트 생성 + Calendar API 활성화
 - Google OAuth 2.0 자격증명 발급 (`credentials.json`)
 - Anthropic API 키 발급
+- Gmail 앱 비밀번호 발급
 
 ### 환경 설정
 
@@ -84,6 +88,18 @@ src/main/java/com/briefing
 spring:
   application:
     name: morning-briefing-agent
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: YOUR_GMAIL
+    password: YOUR_APP_PASSWORD
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 google:
   calendar:
@@ -93,6 +109,9 @@ google:
 
 anthropic:
   api-key: YOUR_CLAUDE_API_KEY
+
+mail:
+  to: YOUR_EMAIL
 ```
 
 `src/main/resources/credentials.json` 에 Google OAuth 자격증명 파일 위치
@@ -105,16 +124,19 @@ anthropic:
 
 처음 실행 시 브라우저에서 Google 로그인 필요 (이후 자동 인증)
 
+> 매일 05:30에 자동으로 브리핑 이메일이 발송됩니다.
+
 ---
 
 ## 📝 개발 기록
 
-| 주차 | 내용 | 상태 |
+| 날짜 | 내용 | 상태 |
 |---|---|---|
-| 1주차 (3/16~) | 프로젝트 세팅 + Google Calendar 연동 | ✅ |
-| 2주차 (3/23~) | Claude API 연동 + 브리핑 생성 | ✅ |
-| 3주차 (3/30~) | NewsAPI 연동 + 이메일 발송 | 🔄 진행 중 |
-| 4주차 (4/6~) | cron 스케줄링 + 전체 통합 | ⬜ |
+| 3/17 | 프로젝트 세팅 + Google Calendar 연동 | ✅ |
+| 4/26 | Claude API 연동 + 브리핑 생성 | ✅ |
+| 4/26 | Gmail SMTP 이메일 발송 구현 | ✅ |
+| 4/26 | BriefingAgent + Scheduler 구현 | ✅ |
+| 4/27~ | AWS EC2 배포 | 🔄 진행 중 |
 
 ---
 
