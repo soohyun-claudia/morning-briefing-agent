@@ -41,8 +41,22 @@ public class BriefingGeneratorService {
     @Value("${anthropic.api-key}")
     private String apiKey;
 
+    /**
+     * 오늘 일정 목록을 받아 Claude API를 호출하여 브리핑 텍스트를 생성한다.
+     *
+     * <p>처리 흐름:
+     * <ol>
+     *   <li>일정 목록을 Claude에게 보낼 프롬프트 텍스트로 변환</li>
+     *   <li>Claude API에 POST 요청 전송</li>
+     *   <li>응답 JSON에서 브리핑 텍스트 추출하여 반환</li>
+     * </ol>
+     *
+     * @param events events 오늘의 캘린더 일정 목록 ({@link CalendarEvent} 리스트)
+     * @return Claude가 생성한 브리핑 텍스트
+     * @throws Exception Exception API 호출 실패 또는 응답 파싱 실패 시
+     */
     public String generateBriefing(List<CalendarEvent> events) throws Exception{
-        // 1. 프롬프트 만들기
+        // 1. 프롬프트 만들기 : 일정 목록을 Claude가 이해할 수 있는 텍스트 형식으로 변환
         StringBuilder prompt = new StringBuilder();
         prompt.append("오늘 일정은 다음과 같습니다:\n");
 
@@ -55,7 +69,8 @@ public class BriefingGeneratorService {
         }
 
         prompt.append("위 일정을 바탕으로 하루를 브리핑해주세요.");
-        // 2. Claude api 호출하기
+
+        // 2. Claude api 호출하기 : RestTemplate으로 HTTP POST 요청 전송
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
