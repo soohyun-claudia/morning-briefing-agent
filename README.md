@@ -19,27 +19,29 @@ Agent 설계 패턴과 AI 개발 워크플로우를 직접 연구합니다.
 | 백엔드 | Spring Boot 3.5.1 / Java 21 |
 | AI | Claude API (Anthropic) |
 | 캘린더 | Google Calendar API |
-| 뉴스 | NewsAPI |
-| 이메일 | Gmail SMTP (JavaMailSender) |
-| 스케줄링 | Spring `@Scheduled` (cron) |
+| 뉴스 | NewsAPI (예정) |
+| 이메일 | Gmail SMTP (JavaMailSender, 예정) |
+| 스케줄링 | Spring `@Scheduled` (cron, 예정) |
 | 배포 | AWS EC2 (예정) |
 | CI/CD | GitHub Actions (예정) |
 
 ---
 
 ## 📁 프로젝트 구조
+
 ```
 src/main/java/com/briefing
 ├── agent
-│   ├── BriefingAgent        # 전체 흐름 조율 (Orchestrator)
-│   ├── CalendarAgent        # 캘린더 수집
-│   ├── NewsAgent            # 뉴스 수집
-│   └── DeliveryAgent        # 브리핑 전달
+│   ├── dto
+│   │   └── CalendarEvent        # 캘린더 일정 DTO
+│   ├── BriefingAgent            # 전체 흐름 조율 (Orchestrator, 예정)
+│   ├── CalendarAgent            # 캘린더 수집 ✅
+│   ├── NewsAgent                # 뉴스 수집 (예정)
+│   └── DeliveryAgent            # 브리핑 전달 (예정)
 ├── service
-│   ├── ClaudeService        # Claude API 호출
-│   └── MailService
-├── client                   # 외부 API 호출
-├── scheduler                # cron 실행
+│   ├── BriefingGeneratorService # Claude API 호출 ✅
+│   └── MailService              # 이메일 발송 (예정)
+├── scheduler                    # cron 실행 (예정)
 └── config
 ```
 
@@ -48,9 +50,9 @@ src/main/java/com/briefing
 ## 🗺 로드맵
 
 ### 1단계 — Single Agent 구축
-- [ ] Google Calendar API 연동
+- [x] Google Calendar API 연동
+- [x] Claude API 연동 + 브리핑 생성
 - [ ] NewsAPI 연동 + 뉴스 요약
-- [ ] Claude API 연동 + 브리핑 생성
 - [ ] 이메일 자동 발송
 - [ ] 매일 아침 cron 자동 실행
 
@@ -68,40 +70,51 @@ src/main/java/com/briefing
 
 ## 🚀 실행 방법
 
-### 환경 변수 설정
+### 사전 준비
+- Java 21
+- Google Cloud Console 프로젝트 생성 + Calendar API 활성화
+- Google OAuth 2.0 자격증명 발급 (`credentials.json`)
+- Anthropic API 키 발급
+
+### 환경 설정
+
+`src/main/resources/application.yml` 생성 후 아래 내용 입력:
+
 ```yaml
-# application.yml
-anthropic:
-  api-key: YOUR_CLAUDE_API_KEY
+spring:
+  application:
+    name: morning-briefing-agent
 
 google:
   calendar:
-    credentials-path: /path/to/credentials.json
+    credentials-path: classpath:credentials.json
+    tokens-path: tokens
+    calendar-id: YOUR_CALENDAR_ID
 
-news:
-  api-key: YOUR_NEWS_API_KEY
-
-spring:
-  mail:
-    username: YOUR_GMAIL
-    password: YOUR_APP_PASSWORD
+anthropic:
+  api-key: YOUR_CLAUDE_API_KEY
 ```
 
+`src/main/resources/credentials.json` 에 Google OAuth 자격증명 파일 위치
+
 ### 실행
+
 ```bash
 ./gradlew bootRun
 ```
+
+처음 실행 시 브라우저에서 Google 로그인 필요 (이후 자동 인증)
 
 ---
 
 ## 📝 개발 기록
 
-| 주차 | 내용 |
-|---|---|
-| 1주차 | 프로젝트 세팅 + Google Calendar 브리핑 |
-| 2주차 | 뉴스 수집 + 요약 추가 |
-| 3주차 | 브리핑 품질 고도화 |
-| 4주차 | 전달 채널 확장 + 1단계 마무리 |
+| 주차 | 내용 | 상태 |
+|---|---|---|
+| 1주차 (3/16~) | 프로젝트 세팅 + Google Calendar 연동 | ✅ |
+| 2주차 (3/23~) | Claude API 연동 + 브리핑 생성 | ✅ |
+| 3주차 (3/30~) | NewsAPI 연동 + 이메일 발송 | 🔄 진행 중 |
+| 4주차 (4/6~) | cron 스케줄링 + 전체 통합 | ⬜ |
 
 ---
 
@@ -110,6 +123,7 @@ spring:
 혼자 작업하는 개인 프로젝트로, 단순하게 유지합니다.
 
 ### 브랜치 구조
+
 ```
 main        ← 완성된 버전만 (언제든 보여줄 수 있는 상태)
 develop     ← 매일 작업하는 브랜치
@@ -117,6 +131,7 @@ feature/*   ← 기능이 크거나 실험적인 작업일 때만
 ```
 
 ### 작업 흐름
+
 ```
 develop에서 매일 작업 + 커밋
        ↓
@@ -124,6 +139,7 @@ develop에서 매일 작업 + 커밋
 ```
 
 ### feature 브랜치 예시
+
 ```
 develop
 ├── feature/claude-api

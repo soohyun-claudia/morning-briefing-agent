@@ -68,7 +68,10 @@ public class BriefingGeneratorService {
                     .append("\n");
         }
 
-        prompt.append("위 일정을 바탕으로 하루를 브리핑해주세요.");
+        prompt.append("위 일정을 바탕으로 하루를 브리핑해주세요.\n");
+        prompt.append("주의사항:\n");
+        prompt.append("- 브리핑 제목은 포함하지 말고 본문 내용만 작성해주세요.\n");
+        prompt.append("- 표(table)는 사용하지 말고 목록 형식으로 작성해주세요.");
 
         // 2. Claude api 호출하기 : RestTemplate으로 HTTP POST 요청 전송
         RestTemplate restTemplate = new RestTemplate();
