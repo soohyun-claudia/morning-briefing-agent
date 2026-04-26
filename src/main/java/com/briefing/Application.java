@@ -18,7 +18,9 @@ public class Application {
 		return args ->{
 			System.out.println("=== 오늘 일정 ===");
 			calendarAgent.getTodayEvents()
-					.forEach(System.out::println);
+					.forEach(event -> System.out.println(
+							event.startTime() + " " + event.title()
+					));
 		};
 	}
 

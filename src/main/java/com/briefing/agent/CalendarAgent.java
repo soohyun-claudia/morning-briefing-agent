@@ -1,5 +1,6 @@
 package com.briefing.agent;
 
+import com.briefing.agent.dto.CalendarEvent;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -17,11 +18,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,7 +57,7 @@ public class CalendarAgent {
     // Google Calendar 서비스 객체
 
     // 오늘 일정 가져오는 메서드
-    public List<String> getTodayEvents() throws Exception{
+    public List<CalendarEvent> getTodayEvents() throws Exception{
         // 1. Calendar 객체 가져오기
         Calendar service = getCalendarService();
 
@@ -77,9 +79,26 @@ public class CalendarAgent {
                 .getItems();
 
         // 일정 제목만 추출해서 반환
-        return events.stream()
-                .map(Event::getSummary)
+        return events.stream() // 이벤트 하나씩 꺼내서 처리
+                .map(event -> new CalendarEvent(
+                    event.getSummary(),
+                    extractStartTime(event)
+                ))
                 .toList();
+    }
+
+    private ZonedDateTime extractStartTime(Event event) {
+        if (event.getStart().getDateTime() != null) {
+            return ZonedDateTime.ofInstant(
+                    Instant.ofEpochMilli(event.getStart().getDateTime().getValue()),
+                    ZoneId.systemDefault()
+                    // 일정 시작 정보 꺼내와서 밀리초(long)으로 변환하고
+                    // 이거를 다시 java instant로 변환(시간의 절대적인 순간)한 후에
+                    // ZonedDateTime으로 변환 후 내 시스템 시간대(한국)으로 설정
+            );
+        }
+        return LocalDate.parse(event.getStart().getDate().toStringRfc3339())
+                .atStartOfDay(ZoneId.systemDefault());
     }
 
     private Calendar getCalendarService() throws Exception {
